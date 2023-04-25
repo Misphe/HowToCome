@@ -20,13 +20,13 @@ public:
         head = nullptr;
     }
 
-    void push_front(T value) {
+    void PushFront(T value) {
         Node<T>* node = new Node<T>(value);
         node->next = head;
         head = node;
     }
 
-    void push_back(T value) {
+    void PushBack(T value) {
         Node<T>* node = new Node<T>(value);
         if (head == nullptr) {
             head = node;
@@ -40,7 +40,7 @@ public:
         }
     }
 
-    T& find(const T& value) const {
+    T& Find(const T& value) const {
         static T null;
         Node<T>* current = head;
         while (current != nullptr) {
@@ -52,7 +52,7 @@ public:
         return null;
     }
 
-    void remove(T value) {
+    void Remove(T value) {
         Node<T>* current = head;
         Node<T>* prev = nullptr;
         while (current != nullptr) {
@@ -71,14 +71,18 @@ public:
         }
     }
 
-    void print() {
+    void Print() {
         Node<T>* current = head;
         while (current != nullptr) {
-            std::cout << current->value << " ";
+            std::cout << current->value << "\n";
             current = current->next;
         }
-        std::cout << "\n";
     }
 
-
+    bool Empty() {
+        if (head == nullptr) {
+            return true;
+        }
+        return false;
+    }
 };
