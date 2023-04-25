@@ -2,20 +2,15 @@
 #include "String.h"
 #include "List.h"
 #include "ConnectionList.h"
+#include "Defines.h"
 
 class Hashmap;
-
-struct Position {
-	int x;
-	int y;
-};
 
 class City {
 private:
 	String name;
 	Position position;
 	ConnectionList connections;
-	bool real;
 public:
 
 	City();
@@ -29,6 +24,7 @@ public:
 	const String& GetName() const;
 
 	void AddConnection(City* city, int distance, Hashmap& hashmap);
+	bool ConnectionExists(City* other);
 
 	bool operator==(City& other);
 	bool operator==(const City& other) const;

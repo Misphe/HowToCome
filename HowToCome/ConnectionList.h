@@ -11,7 +11,8 @@ public:
 
     void PushBack(Connection connection);
 
-    City& Find(City& city);
+    City* Find(City& city);
+    Connection* Find(City* city);
 
     void Print();
 

@@ -19,16 +19,26 @@ void ConnectionList::PushBack(Connection connection) {
     }
 }
 
-City& ConnectionList::Find(City& city) {
-    static City null;
+City* ConnectionList::Find(City& city) {
     Connection* current = head;
     while (current != nullptr) {
         if (*current->city == city) {
-            return *current->city;
+            return current->city;
         }
         current = current->next;
     }
-    return null;
+    return nullptr;
+}
+
+Connection* ConnectionList::Find(City* city) {
+    Connection* current = head;
+    while (current != nullptr) {
+        if (*current->city == *city) {
+            return current;
+        }
+        current = current->next;
+    }
+    return nullptr;
 }
 
 void ConnectionList::Print() {

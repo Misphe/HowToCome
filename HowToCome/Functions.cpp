@@ -15,6 +15,8 @@ bool CityCharacter(const char& character) {
 	return false;
 }
 
+
+// unused
 String CreateFakeName(int number) {
 	String result = "ABC";
 	while (number != 0) {

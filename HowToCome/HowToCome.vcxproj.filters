@@ -65,5 +65,11 @@
     <ClInclude Include="ConnectionList.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="Queue.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Pliki zasobów</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
