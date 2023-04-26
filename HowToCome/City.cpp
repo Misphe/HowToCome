@@ -8,6 +8,10 @@ City::City() {
 	position = { 0,0 };
 }
 
+City::~City() {
+
+}
+
 City::City(String& set_name, Position set_pos) {
 	name = set_name;
 	position = set_pos;
@@ -41,8 +45,8 @@ const String& City::GetName() const {
 	return name;
 }
 
-void City::AddConnection(City* city, int distance, Hashmap& hashmap) {
-	std::cout << *this << " found city " << *city << " distance: " << distance << "\n";
+void City::AddConnection(City* city, int distance) {
+	//std::cout << *this << " found city " << *city << " distance: " << distance << "\n";
 	connections.PushBack({ city, distance });
 }
 
@@ -53,6 +57,17 @@ bool City::ConnectionExists(City* other) {
 
 bool City::operator==(City& other) {
 	return GetName() == other.GetName();
+}
+
+bool City::operator==(String& checked_name) {
+	return GetName() == checked_name;
+}
+
+bool City::operator==(char*& other) {
+	if (name == other) {
+		return true;
+	}
+	return false;
 }
 
 bool City::operator==(const City& other) const {

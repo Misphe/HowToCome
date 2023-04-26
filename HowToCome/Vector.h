@@ -42,6 +42,15 @@ public:
 		size = 0;
 	}
 
+	T* begin() {
+		if (size == 0) return nullptr;
+		return &data[0];
+	}
+
+	T* end() {
+		return data + size;
+	}
+
 	~Vector() {
 		delete[] data;
 		data = nullptr;

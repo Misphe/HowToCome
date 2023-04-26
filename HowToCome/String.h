@@ -2,7 +2,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
 #include <iostream>
-#define BUFFOR 2
+#define BUFFOR 10
 
 class String {
 private:

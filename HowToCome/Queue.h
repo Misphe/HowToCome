@@ -12,6 +12,7 @@ public:
 		slot = set_slot;
 		next = nullptr;
 	}
+	~QueueNode(){}
 };
 
 class Queue {
@@ -59,4 +60,6 @@ public:
 
 		return false;
 	}
+
+	~Queue(){}
 };

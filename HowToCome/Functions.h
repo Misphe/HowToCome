@@ -9,3 +9,6 @@ bool CityCharacter(const char& character);
 
 // unused
 String CreateFakeName(int number);
+
+void InputCityName(char*& city);
+void InputDistance(int& distance);

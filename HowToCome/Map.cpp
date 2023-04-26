@@ -1,8 +1,9 @@
 #include "Map.h"
 #include "Functions.h"
+#include "stdio.h"
 #include <iostream>
 
-Map::Map(int set_width, int set_height, Hashmap& set_hashmap) : hashmap(set_hashmap) {
+Map::Map(int set_width, int set_height) {
 	width = set_width;
 	height = set_height;
 	map = new char* [width];
@@ -19,11 +20,25 @@ Map::Map(int set_width, int set_height, Hashmap& set_hashmap) : hashmap(set_hash
 	
 }
 
-void Map::LoadMap() {
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < width; j++) {
-			std::cin >> map[j][i];
-		}
+Map::~Map() {
+	for (int x = 0; x < width; x++) {
+		delete[] map[x];
+		delete[] visited[x];
+		delete[] city_map[x];
+	}
+	delete[] map;
+	delete[] visited;
+	delete[] city_map;
+}
+
+void Map::PrintHashmap() {
+	hashmap.PrintTaken();
+}
+
+void Map::LoadCoordinate(int x, int y) {
+	map[x][y] = getchar();
+	if (map[x][y] == '\n') {
+		map[x][y] = getchar();
 	}
 }
 
@@ -42,18 +57,10 @@ void Map::LoadCity(int x, int y) {
 
 void Map::AddCity(const int& x, const int& y) {
 	String name = FindCityName(x, y);
-	City city(name, { x,y });
+	City* city = new City(name, { x,y });
 	hashmap.AddKey(city);
-	city_map[x][y] = &hashmap[city];
+	city_map[x][y] = city;
 }
-
-//void Map::AddFakeCity(const int& x, const int& y) {
-//	static int fake_city_id = 0;
-//	fake_city_id++;
-//	City city(CreateFakeName(fake_city_id), {x,y});
-//	hashmap.AddKey(city);
-//	city_map[x][y] = &hashmap[city];
-//}
 
 String Map::FindCityName(const int& x, const int& y) {
 	char character;
@@ -125,19 +132,17 @@ bool Map::StartOrEndOfName(int x, int y) {
 	return true;
 }
 
-void Map::IterateMap(void(Map::*callback)(int, int), Map* map, bool(Map::*condition)(int,int)) {
+void Map::IterateMap(void(Map::*callback)(int, int), bool(Map::*condition)(int,int)) {
 	for (int y = 0; y < height; y++) {
-
 		for (int x = 0; x < width; x++) {
 
-			if ((map->*condition)(x,y)) {
-				(map->*callback)(x,y);
+			if ((this->*condition)(x,y)) {
+				(this->*callback)(x,y);
 			}
 
 		}
 	}
 }
-
 
 // perhaps delete later
 void Map::FindRoad(int start_x, int start_y) {
@@ -170,38 +175,30 @@ bool Map::IsIntersection(int start_x, int start_y) {
 	}
 }
 
-void Map::ResetVisited() {
-	for (int i = 0; i < width; i++) {
-		for (int j = 0; j < height; j++) {
-			visited[i][j] = false;
-		}
+void Map::ResetVisited(Vector<Position>& clearer) {
+	for (Position& pos : clearer) {
+		visited[pos.x][pos.y] = false;
 	}
 }
 
 void Map::SearchConnections(int start_x, int start_y) {
 	Queue queue;
-	Vector<Position> visited_v;
+	Vector<Position> clearer;
 	QueuePos start = { {start_x,start_y},0 };
 	QueueAdjacent(queue, start);
 	visited[start_x][start_y] = true;
-
-	// TODO add vector logic
+	clearer.Add(start.position);
 	
 	while (!queue.Empty()) {
 		QueuePos current_pos = queue.Peek();
-		if (current_pos.position.x == 7 && current_pos.position.y == 4) {
-			int x = 1;
-		}
-		if (current_pos.position.x == 9 && current_pos.position.y == 4) {
-			int x = 2;
-		}
+		clearer.Add({ current_pos.position.x, current_pos.position.y });
 
 		if (IsCity(current_pos.position)) {
 			int x = current_pos.position.x;
 			int y = current_pos.position.y;
 			int distance = current_pos.distance;
 
-			city_map[start_x][start_y]->AddConnection(city_map[x][y], distance, hashmap);
+			city_map[start_x][start_y]->AddConnection(city_map[x][y], distance);
 		}
 		else {
 			QueueAdjacent(queue, current_pos);
@@ -210,36 +207,20 @@ void Map::SearchConnections(int start_x, int start_y) {
 	}
 
 	// TODO fix memory leaks
-	ResetVisited();
+	ResetVisited(clearer);
 }
 
 void Map::QueueAdjacent(Queue& queue, QueuePos& cur_slot) {
 	int x = cur_slot.position.x;
 	int y = cur_slot.position.y;
-	Position tmp = cur_slot.position;
+	int distance = cur_slot.distance;
+	Position tmp[] = { {x - 1,y},{x + 1,y},{x, y + 1},{x, y - 1} };
 
-
-	// add vector positions
-	tmp.x = x - 1;
-	if (InsideMap(tmp) && NotVisited(tmp) && (IsRoad(tmp) || IsCity(tmp))) {
-		visited[tmp.x][tmp.y] = true;
-		queue.PushBack({ tmp, cur_slot.distance + 1 });
-	}
-	tmp.x = x + 1;
-	if (InsideMap(tmp) && NotVisited(tmp) && (IsRoad(tmp) || IsCity(tmp))) {
-		visited[tmp.x][tmp.y] = true;
-		queue.PushBack({ tmp, cur_slot.distance + 1 });
-	}
-	tmp.x = x;
-	tmp.y = y + 1;
-	if (InsideMap(tmp) && NotVisited(tmp) && (IsRoad(tmp) || IsCity(tmp))) {
-		visited[tmp.x][tmp.y] = true;
-		queue.PushBack({ tmp, cur_slot.distance + 1 });
-	}
-	tmp.y = y - 1;
-	if (InsideMap(tmp) && NotVisited(tmp) && (IsRoad(tmp) || IsCity(tmp))) {
-		visited[tmp.x][tmp.y] = true;
-		queue.PushBack({ tmp, cur_slot.distance + 1 });
+	for (auto& pos : tmp) {
+		if (InsideMap(pos) && NotVisited(pos) && (IsRoad(pos) || IsCity(pos))) {
+			visited[pos.x][pos.y] = true;
+			queue.PushBack({ pos, distance + 1 });
+		}
 	}
 }
 
@@ -249,15 +230,15 @@ bool Map::IsRoad(const int& x, const int& y) {
 }
 
 bool Map::IsRoad(const Position& pos) {
-	if (map[pos.x][pos.y] == '#') return true;
-	return false;
+	return IsRoad(pos.x, pos.y);
+}
+
+bool Map::ReturnTrue(int x, int y) {
+	return true;
 }
 
 bool Map::IsCity(Position& pos) {
-	if (map[pos.x][pos.y] == '*') {
-		return true;
-	}
-	return false;
+	return IsCity(pos.x, pos.y);
 }
 
 bool Map::IsCity(int x, int y) {
@@ -272,24 +253,29 @@ bool Map::NotVisited(Position& pos) {
 	return false;
 }
 
-//const int start_x = x;
-//const int start_y = y;
-//City* start = city_map[start_x][start_y];
-//bool end = false;
-//int travel_time = 0;
-//while (!end) {
-//	travel_time++;
-//	x++;
-//
-//	if (!InsideMap(x, y)) break;
-//
-//	if (map[x][y] == '*') {
-//		City* found = city_map[x][y];
-//		start->AddConnection(found, travel_time, hashmap);
-//		found->AddConnection(start, travel_time, hashmap);
-//		std::cout << *start << " and " << *found << " connected\n";
-//		end = true;
-//	}
-//
-//}
+void Map::LoadFlights() {
+	int flights_count;
+	std::cin >> flights_count;
+	char* city1 = new char[64];
+	char* city2 = new char[64];
+	int distance;
+
+	getchar();
+	int i;
+	for (i = 0; i < flights_count; i++) {
+		distance = 0;
+		InputCityName(city1);
+		InputCityName(city2);
+		InputDistance(distance);
+
+		City* city1_p = hashmap[city1];
+		City* city2_p = hashmap[city2];
+		city1_p->AddConnection(city2_p, distance);
+		city2_p->AddConnection(city1_p, distance);
+	}
+	delete[] city1;
+	delete[] city2;
+}
+
+
 

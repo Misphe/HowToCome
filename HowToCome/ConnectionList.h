@@ -6,8 +6,10 @@ class City;
 class ConnectionList {
 private:
     Connection* head;
+    Connection* last;
 public:
     ConnectionList();
+    ~ConnectionList();
 
     void PushBack(Connection connection);
 

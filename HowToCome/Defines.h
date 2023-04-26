@@ -1,5 +1,7 @@
 #pragma once
 #define NULL_POS {-1,-1}
+#define DIGITGROUP 5
+#define BASE 26
 
 struct Position {
 	int x;

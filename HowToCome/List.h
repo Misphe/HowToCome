@@ -10,12 +10,22 @@ public:
         this->value = value;
         next = nullptr;
     }
+    ~Node() {
+        if constexpr (std::is_pointer_v<T>) {
+            if (value != nullptr) {
+                delete value;
+                value = nullptr;
+            }
+        }
+    }
+    
 };
 
 template <typename T>
 class List {
 public:
     Node<T>* head;
+    Node<T>* last;
     List() {
         head = nullptr;
     }
@@ -27,16 +37,13 @@ public:
     }
 
     void PushBack(T value) {
-        Node<T>* node = new Node<T>(value);
         if (head == nullptr) {
-            head = node;
+            head = new Node<T>(value);
+            last = head;
         }
         else {
-            Node<T>* current = head;
-            while (current->next != nullptr) {
-                current = current->next;
-            }
-            current->next = node;
+            last->next = new Node<T>(value);
+            last = last->next;
         }
     }
 
@@ -45,6 +52,42 @@ public:
         Node<T>* current = head;
         while (current != nullptr) {
             if (current->value == value) {
+                return current->value;
+            }
+            current = current->next;
+        }
+        return null;
+    }
+
+    T& PointerFind(const T& value) const {
+        static T null;
+        Node<T>* current = head;
+        while (current != nullptr) {
+            if (*(current->value) == *value) {
+                return current->value;
+            }
+            current = current->next;
+        }
+        return null;
+    }
+
+    T& PointerFind(String& value) const {
+        static T null;
+        Node<T>* current = head;
+        while (current != nullptr) {
+            if (*(current->value) == value) {
+                return current->value;
+            }
+            current = current->next;
+        }
+        return null;
+    }
+
+    T& PointerFind(char*& value) const {
+        static T null;
+        Node<T>* current = head;
+        while (current != nullptr) {
+            if (*(current->value) == value) {
                 return current->value;
             }
             current = current->next;
@@ -84,5 +127,27 @@ public:
             return true;
         }
         return false;
+    }
+
+    int GetSize() {
+        int i = 0;
+        Node<T>* current = head;
+        while (current != nullptr) {
+            i++;
+            current = current->next;
+        }
+        return i;
+    }
+
+    ~List() {
+        Node<T>* current = head;
+        Node<T>* tmp = current;
+        while (current != nullptr) {
+            tmp = current;
+            current = current->next;
+            delete tmp;
+        }
+        head = nullptr;
+        last = nullptr;
     }
 };

@@ -1,21 +1,31 @@
 #include "ConnectionList.h"
 #include "City.h"
 
-ConnectionList::ConnectionList() : head(nullptr) {
+ConnectionList::ConnectionList() : head(nullptr), last(nullptr) {
 
+}
+
+ConnectionList::~ConnectionList() {
+    Connection* current = head;
+    Connection* tmp = current;
+    while (current != nullptr) {
+        tmp = current;
+        current = current->next;
+        delete tmp;
+    }
+    head = nullptr;
+    last = nullptr;
 }
 
 void ConnectionList::PushBack(Connection connection) {
     Connection* new_connection = new Connection(connection);
     if (head == nullptr) {
         head = new_connection;
+        last = head;
     }
     else {
-        Connection* current = head;
-        while (current->next != nullptr) {
-            current = current->next;
-        }
-        current->next = new_connection;
+        last->next = new_connection;
+        last = last->next;
     }
 }
 
