@@ -42,6 +42,23 @@ public:
 		size = 0;
 	}
 
+	void Reserve(int i) {
+		if (size != 0) {
+			T* tmp = data;
+			capacity = capacity + i;
+			data = new T[capacity];
+			for (int i = 0; i < size; i++) {
+				data[i] = tmp[i];
+			}
+			delete[] tmp;
+		}
+		else {
+			delete[] data;
+			capacity = i;
+			data = new T[capacity];
+		}
+	}
+
 	T* begin() {
 		if (size == 0) return nullptr;
 		return &data[0];
@@ -49,6 +66,22 @@ public:
 
 	T* end() {
 		return data + size;
+	}
+
+	T& Front() {
+		return data[0];
+	}
+
+	T& Back() {
+		return data[size - 1];
+	}
+
+	void PopBack() {
+		size--;
+	}
+
+	const int& GetSize() {
+		return size;
 	}
 
 	~Vector() {

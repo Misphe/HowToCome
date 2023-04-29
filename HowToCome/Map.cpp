@@ -1,11 +1,14 @@
 #include "Map.h"
 #include "Functions.h"
 #include "stdio.h"
+#include "PriorityQueue.h"
 #include <iostream>
 
 Map::Map(int set_width, int set_height) {
 	width = set_width;
 	height = set_height;
+	all_cities = nullptr;
+	cities_count = 0;
 	map = new char* [width];
 	city_map = new City** [width];
 	visited = new bool* [width];
@@ -53,13 +56,14 @@ void Map::Print() {
 
 void Map::LoadCity(int x, int y) {
 	AddCity(x, y);
+	cities_count++;
 }
 
 void Map::AddCity(const int& x, const int& y) {
 	String name = FindCityName(x, y);
 	City* city = new City(name, { x,y });
-	hashmap.AddKey(city);
 	city_map[x][y] = city;
+	hashmap.AddKey(city);
 }
 
 String Map::FindCityName(const int& x, const int& y) {
@@ -132,17 +136,17 @@ bool Map::StartOrEndOfName(int x, int y) {
 	return true;
 }
 
-void Map::IterateMap(void(Map::*callback)(int, int), bool(Map::*condition)(int,int)) {
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-
-			if ((this->*condition)(x,y)) {
-				(this->*callback)(x,y);
-			}
-
-		}
-	}
-}
+//void Map::IterateMap(void(Map::* callback)(int, int), bool(Map::* condition)(int, int)) {
+//	for (int y = 0; y < height; y++) {
+//		for (int x = 0; x < width; x++) {
+//
+//			if ((this->*condition)(x, y)) {
+//				(this->*callback)(x, y);
+//			}
+//
+//		}
+//	}
+//}
 
 // perhaps delete later
 void Map::FindRoad(int start_x, int start_y) {
@@ -182,8 +186,16 @@ void Map::ResetVisited(Vector<Position>& clearer) {
 }
 
 void Map::SearchConnections(int start_x, int start_y) {
+
+	/// for dijkstra
+	static int city_number = 0;
+	all_cities[city_number] = city_map[start_x][start_y];
+	city_number++;
+	///
+
 	Queue queue;
 	Vector<Position> clearer;
+	clearer.Reserve(300);
 	QueuePos start = { {start_x,start_y},0 };
 	QueueAdjacent(queue, start);
 	visited[start_x][start_y] = true;
@@ -199,6 +211,7 @@ void Map::SearchConnections(int start_x, int start_y) {
 			int distance = current_pos.distance;
 
 			city_map[start_x][start_y]->AddConnection(city_map[x][y], distance);
+			city_map[x][y]->total_in_flights++;
 		}
 		else {
 			QueueAdjacent(queue, current_pos);
@@ -271,11 +284,160 @@ void Map::LoadFlights() {
 		City* city1_p = hashmap[city1];
 		City* city2_p = hashmap[city2];
 		city1_p->AddConnection(city2_p, distance);
-		city2_p->AddConnection(city1_p, distance);
+		city2_p->total_in_flights++;
 	}
 	delete[] city1;
 	delete[] city2;
 }
 
+void Map::CreateCitiesArray() {
+	all_cities = new City* [cities_count];
+}
+
+void Map::ResetVisitedDijkstra(Vector<City*>& clearer) {
+	for (City*& city : clearer) {
+		city->visited = false;
+		city->path.Reset();
+	}
+}
+
+void Map::StartCommands() {
+
+	int commands_amount;
+	int command;
+	std::cin >> commands_amount;
+	char* city1 = new char[64];
+	char* city2 = new char[64];
+	getchar();
+
+	for (int i = 0; i < commands_amount; i++) {
+
+		Vector<City*> clearer;
+		InputCityName(city1);
+		InputCityName(city2);
+		command = getchar() - 48;
+		getchar();
+
+		if (strcmp(city1, city2) == 0) {
+			std::cout << "0" << "\n";
+			continue;
+		}
+
+		City* start = hashmap[city1];
+		City* end = hashmap[city2];
+
+		Dijkstra(start, end, clearer);
 
 
+		start->path.distance = INF;
+		start->path.source = nullptr;
+		start->visited = false;
+
+		if (command == 1) {
+			std::cout << end->path.distance;
+			PrintTrip(end->path.source, start);
+			std::cout << "\n";
+		}
+		else {
+			std::cout << end->path.distance << "\n";
+		}
+		ResetVisitedDijkstra(clearer);
+	}
+}
+
+void Map::Dijkstra(City* start, City* end, Vector<City*>& clearer) {
+	int distance;
+	int end_count = 0;
+	Connection* end_condition = end->GetConnection();
+
+	start->path.distance = 0;
+	start->path.source = start;
+	start->visited = true;
+
+	Priority_Queue pq(1000);
+	PQAdjacent(pq, start, distance);
+
+	Edge current;
+	while (!pq.Empty() && end_count != end->total_in_flights) {
+		current = pq.Peek();
+
+		clearer.Add(current.destination);
+		if (current.path.distance < current.destination->path.distance) {
+			current.destination->path = current.path;
+		}
+
+		current.destination->visited = true;
+		pq.Pop();
+		PQAdjacent(pq, current.destination, distance);
+	}
+}
+
+void Map::PQAdjacent(Priority_Queue& pq, City*& start, int& distance) {
+	Connection* current = start->GetConnection();
+	while (current != nullptr) {
+		distance = start->path.distance + current->distance;
+		pq.Enqueue(current->city, { start, distance });
+		current = current->next;
+	}
+}
+
+void Map::PrintTrip(City* current, City* source) {
+	List<String*> journey;
+
+	while (current != source) {
+		journey.PushBack(&current->GetName());
+		current = current->path.source;
+	}
+
+	journey.PrintBackwards();
+}
+
+void Map::LoopLoadCoordinate() {
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+
+			LoadCoordinate(x, y);
+
+		}
+	}
+}
+
+void Map::LoopLoadCity() {
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+
+			if (IsCity(x, y)) {
+				LoadCity(x, y);
+			}
+
+		}
+	}
+}
+
+void Map::LoopSearchConnections() {
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+
+			if (IsCity(x, y)) {
+				SearchConnections(x, y);
+			}
+
+		}
+	}
+}
+
+bool Map::DijkstraEnd(City*& destination, Connection* current) {
+	while (current != nullptr) {
+		if (current->city->visited == false) {
+			return false;
+		}
+		current = current->next;
+	}
+
+	current = destination->GetConnection();
+	int distance;
+	while (current != nullptr) {
+		
+	}
+	return true;
+}

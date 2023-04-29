@@ -4,14 +4,14 @@
 class City;
 
 class ConnectionList {
-private:
+public:
     Connection* head;
     Connection* last;
-public:
+
     ConnectionList();
     ~ConnectionList();
 
-    void PushBack(Connection connection);
+    void PushBack(Connection* connection);
 
     City* Find(City& city);
     Connection* Find(City* city);

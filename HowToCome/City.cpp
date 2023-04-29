@@ -46,13 +46,17 @@ const String& City::GetName() const {
 }
 
 void City::AddConnection(City* city, int distance) {
-	//std::cout << *this << " found city " << *city << " distance: " << distance << "\n";
-	connections.PushBack({ city, distance });
+	Connection* new_connection = new Connection(city, distance);
+	connections.PushBack(new_connection);
 }
 
 bool City::ConnectionExists(City* other) {
 	if (connections.Find(*other)) return true;
 	return false;
+}
+
+Connection* City::GetConnection() {
+	return connections.head;
 }
 
 bool City::operator==(City& other) {

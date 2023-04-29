@@ -17,8 +17,8 @@ ConnectionList::~ConnectionList() {
     last = nullptr;
 }
 
-void ConnectionList::PushBack(Connection connection) {
-    Connection* new_connection = new Connection(connection);
+void ConnectionList::PushBack(Connection* connection) {
+    Connection* new_connection = connection;
     if (head == nullptr) {
         head = new_connection;
         last = head;

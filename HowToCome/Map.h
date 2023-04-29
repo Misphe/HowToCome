@@ -3,6 +3,7 @@
 #include "Hashmap.h"
 #include "Queue.h"
 #include "Vector.h"
+#include "PriorityQueue.h"
 
 class Map {
 private:
@@ -12,6 +13,8 @@ private:
 	Hashmap hashmap;
 	City*** city_map;
 	bool** visited;
+	City** all_cities;
+	int cities_count;
 
 public:
 	Map(int set_width, int set_height);
@@ -42,7 +45,7 @@ public:
 
 	// map array related
 	void Print();
-	void IterateMap(void (Map::*callback)(int, int), bool (Map::*condition)(int, int));
+	//void IterateMap(void (Map::*callback)(int, int), bool (Map::*condition)(int, int));
 	bool InsideMap(const int& x, const int& y);
 	bool InsideMap(const Position& pos);
 	bool IsRoad(const int& x, const int& y);
@@ -53,5 +56,19 @@ public:
 	bool ReturnTrue(int x, int y);
 	bool IsCity(Position& pos);
 	bool IsCity(int x, int y);
+
+	// Dijkstra related
+	void CreateCitiesArray();
+	void StartCommands();
+	void ResetVisitedDijkstra(Vector<City*>& clearer);
+	void Dijkstra(City* start, City* end, Vector<City*>& clearer);
+	void PQAdjacent(Priority_Queue& pq, City*& start, int& distance);
+	void PrintTrip(City* current, City* source);
+	bool DijkstraEnd(City*& destination, Connection* connections);
+
+	// callback error
+	void LoopLoadCoordinate();
+	void LoopLoadCity();
+	void LoopSearchConnections();
 };
 

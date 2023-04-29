@@ -6,17 +6,14 @@ class Node {
 public:
     T value;
     Node<T>* next;
+    Node<T>* prev;
     Node(T value) {
         this->value = value;
         next = nullptr;
+        prev = nullptr;
     }
     ~Node() {
-        if constexpr (std::is_pointer_v<T>) {
-            if (value != nullptr) {
-                delete value;
-                value = nullptr;
-            }
-        }
+        // MEMORY LEAK????
     }
     
 };
@@ -28,11 +25,15 @@ public:
     Node<T>* last;
     List() {
         head = nullptr;
+        last = nullptr;
     }
 
     void PushFront(T value) {
         Node<T>* node = new Node<T>(value);
         node->next = head;
+        if (head != nullptr) {
+            head->prev = node;
+        }
         head = node;
     }
 
@@ -43,11 +44,13 @@ public:
         }
         else {
             last->next = new Node<T>(value);
+            last->next->prev = last;
             last = last->next;
         }
     }
 
-    T& Find(const T& value) const {
+    template <typename U>
+    T& Find(const U& value) const {
         static T null;
         Node<T>* current = head;
         while (current != nullptr) {
@@ -70,6 +73,7 @@ public:
         }
         return null;
     }
+
 
     T& PointerFind(String& value) const {
         static T null;
@@ -95,30 +99,19 @@ public:
         return null;
     }
 
-    void Remove(T value) {
-        Node<T>* current = head;
-        Node<T>* prev = nullptr;
-        while (current != nullptr) {
-            if (current->value == value) {
-                if (prev == nullptr) {
-                    head = current->next;
-                }
-                else {
-                    prev->next = current->next;
-                }
-                delete current;
-                return;
-            }
-            prev = current;
-            current = current->next;
-        }
-    }
-
     void Print() {
         Node<T>* current = head;
         while (current != nullptr) {
             std::cout << current->value << "\n";
             current = current->next;
+        }
+    }
+
+    void PrintBackwards() {
+        Node<T>* current = last;
+        while (current != nullptr) {
+            std::cout << " " << *current->value;
+            current = current->prev;
         }
     }
 

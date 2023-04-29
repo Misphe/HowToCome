@@ -41,3 +41,4 @@ void InputDistance(int& distance) {
 		distance = distance * 10 + a;
 	}
 }
+

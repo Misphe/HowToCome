@@ -6,8 +6,9 @@
 #include "Hashmap.h"
 #include "Queue.h"
 #include "Vector.h"
+#include "PriorityQueue.h"
 #include <chrono>
-#define TEST 1
+#define TEST 0
 
 int main() {
 
@@ -18,44 +19,58 @@ int main() {
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
+
 	{
 		Map map(width, height);
-		map.IterateMap(&Map::LoadCoordinate, &Map::ReturnTrue);
+		//map.IterateMap(&Map::LoadCoordinate, &Map::ReturnTrue);
+		map.LoopLoadCoordinate();
 
-		if (TEST) {
+		/*if (TEST) {
 			auto end = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 			std::cout << "Time taken: " << duration << " microseconds" << std::endl;
-		}
+		}*/
 
-		map.IterateMap(&Map::LoadCity, &Map::IsCity);
+		//map.IterateMap(&Map::LoadCity, &Map::IsCity);
+		map.LoopLoadCity();
 
-		if (TEST) {
+		/*if (TEST) {
 			end = std::chrono::high_resolution_clock::now();
 			duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 			std::cout << "Time taken: " << duration << " microseconds" << std::endl;
-		}
+		}*/
 
-		map.IterateMap(&Map::SearchConnections, &Map::IsCity);
+		
 
-		if (TEST) {
+		map.CreateCitiesArray();
+		//map.IterateMap(&Map::SearchConnections, &Map::IsCity);
+		map.LoopSearchConnections();
+
+		/*if (TEST) {
 			end = std::chrono::high_resolution_clock::now();
 			duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 			std::cout << "Time taken: " << duration << " microseconds" << std::endl;
-		}
+		}*/
 
 		map.LoadFlights();
 
-		if (TEST){
+		/*if (TEST){
 			end = std::chrono::high_resolution_clock::now();
 			duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 			std::cout << "Time taken: " << duration << " microseconds" << std::endl;
-		}
+		}*/
 
-		//map.PrintHashmap();
+		map.StartCommands();
+
+		/*if (TEST) {
+			end = std::chrono::high_resolution_clock::now();
+			duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+			std::cout << "Time taken: " << duration << " microseconds" << std::endl;
+		}*/
+
 	}
 
-	std::cout << "finished";
+	//std::cout << "finished";
 
 	return 0;
 
