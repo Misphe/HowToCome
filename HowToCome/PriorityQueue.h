@@ -11,12 +11,15 @@ public:
 	Edge() {
 		destination = nullptr;
 	}
-	Edge(City* set_destination, City* set_source, int set_distance) {
+	Edge(City* set_destination, City* set_source, int set_distance) : path(set_source, set_distance) {
 		destination = set_destination;
-		path.source = set_source;
-		path.distance = set_distance;
+	}
+	Edge(City*&& set_destination, City*&& set_source, int&& set_distance) : path(set_source, set_distance) {
+		destination = set_destination;
 	}
 	bool operator<(const Edge& other) {
+		if (other.path.distance == INF) return true;
+
 		return path.distance < other.path.distance;
 	}
 };
@@ -33,22 +36,17 @@ public:
 	Priority_Queue(int i) {
 		pq.Reserve(i);
 	}
+	~Priority_Queue() {
+
+	}
+
 	void Enqueue(City* set_city, Path path);
+	void Enqueue(City* set_city, City*& source, int& distance);
 	void Heapify(int index);
 
 	void Pop();
 	Edge& Peek();
 
 	bool Empty();
-	void PrintTime();
-
-	void start() {
-		s_time = std::chrono::high_resolution_clock::now();
-	}
-	void end() {
-		e_time = std::chrono::high_resolution_clock::now();
-	}
-	void update() {
-		dur += std::chrono::duration_cast<std::chrono::microseconds>(e_time - s_time).count();
-	}
+	void Clear();
 };

@@ -7,7 +7,6 @@
 Map::Map(int set_width, int set_height) {
 	width = set_width;
 	height = set_height;
-	all_cities = nullptr;
 	cities_count = 0;
 	map = new char* [width];
 	city_map = new City** [width];
@@ -187,12 +186,6 @@ void Map::ResetVisited(Vector<Position>& clearer) {
 
 void Map::SearchConnections(int start_x, int start_y) {
 
-	/// for dijkstra
-	static int city_number = 0;
-	all_cities[city_number] = city_map[start_x][start_y];
-	city_number++;
-	///
-
 	Queue queue;
 	Vector<Position> clearer;
 	clearer.Reserve(300);
@@ -200,7 +193,7 @@ void Map::SearchConnections(int start_x, int start_y) {
 	QueueAdjacent(queue, start);
 	visited[start_x][start_y] = true;
 	clearer.Add(start.position);
-	
+
 	while (!queue.Empty()) {
 		QueuePos current_pos = queue.Peek();
 		clearer.Add({ current_pos.position.x, current_pos.position.y });
@@ -211,7 +204,6 @@ void Map::SearchConnections(int start_x, int start_y) {
 			int distance = current_pos.distance;
 
 			city_map[start_x][start_y]->AddConnection(city_map[x][y], distance);
-			city_map[x][y]->total_in_flights++;
 		}
 		else {
 			QueueAdjacent(queue, current_pos);
@@ -284,14 +276,9 @@ void Map::LoadFlights() {
 		City* city1_p = hashmap[city1];
 		City* city2_p = hashmap[city2];
 		city1_p->AddConnection(city2_p, distance);
-		city2_p->total_in_flights++;
 	}
 	delete[] city1;
 	delete[] city2;
-}
-
-void Map::CreateCitiesArray() {
-	all_cities = new City* [cities_count];
 }
 
 void Map::ResetVisitedDijkstra(Vector<City*>& clearer) {
@@ -343,11 +330,12 @@ void Map::StartCommands() {
 		}
 		ResetVisitedDijkstra(clearer);
 	}
+	delete[] city1;
+	delete[] city2;
 }
 
 void Map::Dijkstra(City* start, City* end, Vector<City*>& clearer) {
 	int distance;
-	int end_count = 0;
 	Connection* end_condition = end->GetConnection();
 
 	start->path.distance = 0;
@@ -358,11 +346,11 @@ void Map::Dijkstra(City* start, City* end, Vector<City*>& clearer) {
 	PQAdjacent(pq, start, distance);
 
 	Edge current;
-	while (!pq.Empty() && end_count != end->total_in_flights) {
+	while (!pq.Empty() && !DijkstraEnd(end)) {
 		current = pq.Peek();
-
 		clearer.Add(current.destination);
-		if (current.path.distance < current.destination->path.distance) {
+
+		if (current.destination->path.distance == INF) {
 			current.destination->path = current.path;
 		}
 
@@ -375,8 +363,10 @@ void Map::Dijkstra(City* start, City* end, Vector<City*>& clearer) {
 void Map::PQAdjacent(Priority_Queue& pq, City*& start, int& distance) {
 	Connection* current = start->GetConnection();
 	while (current != nullptr) {
-		distance = start->path.distance + current->distance;
-		pq.Enqueue(current->city, { start, distance });
+		if (!current->city->visited) {
+			distance = start->path.distance + current->distance;
+			pq.Enqueue(current->city, start, distance);
+		}
 		current = current->next;
 	}
 }
@@ -426,18 +416,9 @@ void Map::LoopSearchConnections() {
 	}
 }
 
-bool Map::DijkstraEnd(City*& destination, Connection* current) {
-	while (current != nullptr) {
-		if (current->city->visited == false) {
-			return false;
-		}
-		current = current->next;
+bool Map::DijkstraEnd(City*& end) {
+	if (end->visited == true) {
+		return true;
 	}
-
-	current = destination->GetConnection();
-	int distance;
-	while (current != nullptr) {
-		
-	}
-	return true;
+	return false;
 }

@@ -13,7 +13,6 @@ private:
 	Hashmap hashmap;
 	City*** city_map;
 	bool** visited;
-	City** all_cities;
 	int cities_count;
 
 public:
@@ -58,13 +57,12 @@ public:
 	bool IsCity(int x, int y);
 
 	// Dijkstra related
-	void CreateCitiesArray();
 	void StartCommands();
 	void ResetVisitedDijkstra(Vector<City*>& clearer);
 	void Dijkstra(City* start, City* end, Vector<City*>& clearer);
 	void PQAdjacent(Priority_Queue& pq, City*& start, int& distance);
 	void PrintTrip(City* current, City* source);
-	bool DijkstraEnd(City*& destination, Connection* connections);
+	bool DijkstraEnd(City*& end);
 
 	// callback error
 	void LoopLoadCoordinate();

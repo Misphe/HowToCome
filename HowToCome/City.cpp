@@ -46,8 +46,8 @@ const String& City::GetName() const {
 }
 
 void City::AddConnection(City* city, int distance) {
-	Connection* new_connection = new Connection(city, distance);
-	connections.PushBack(new_connection);
+	Connection* new_connection_to = new Connection(city, distance);
+	connections.PushBack(new_connection_to);
 }
 
 bool City::ConnectionExists(City* other) {

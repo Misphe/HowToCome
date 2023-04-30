@@ -29,7 +29,6 @@ private:
 public:
 	Path path;
 	bool visited = false; // for optimalization
-	int total_in_flights = 0;
 
 	City();
 	~City();

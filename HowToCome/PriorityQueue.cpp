@@ -2,19 +2,30 @@
 #include "Functions.h"
 
 void Priority_Queue::Enqueue(City* set_city, Path path) {
-	if (set_city->visited == true) {
-		if (path.distance < set_city->path.distance) {
-			set_city->path = path;
-		}
-		return;
-	}
 
-	pq.Add({ set_city, path.source, path.distance });
+	pq.Add(set_city, path.source, path.distance);
 	int number = pq.GetSize();
 	int parent;
 	while (number > 1) {
 		parent = number / 2;
-		if (pq[number - 1].path.distance < pq[parent - 1].path.distance) {
+		if (pq[number - 1] < pq[parent - 1]) {
+			Swap(pq[number - 1], pq[parent - 1]);
+		}
+		else {
+			break;
+		}
+		number = parent;
+	}
+}
+
+void Priority_Queue::Enqueue(City* set_city, City*& source, int& distance) {
+
+	pq.Add(set_city, source, distance);
+	int number = pq.GetSize();
+	int parent;
+	while (number > 1) {
+		parent = number / 2;
+		if (pq[number - 1] < pq[parent - 1]) {
 			Swap(pq[number - 1], pq[parent - 1]);
 		}
 		else {
@@ -60,6 +71,10 @@ Edge& Priority_Queue::Peek() {
 
 bool Priority_Queue::Empty() {
 	return !pq.GetSize();
+}
+
+void Priority_Queue::Clear() {
+	delete this;
 }
 
 

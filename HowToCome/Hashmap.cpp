@@ -6,6 +6,15 @@ Hashmap::Hashmap() {
 }
 
 Hashmap::~Hashmap() {
+	for (int i = 0; i < HASHMAP_SIZE; i++) {
+		if (map[i].head != nullptr) {
+			Node<City*>* current = map[i].head;
+			while (current != nullptr) {
+				delete current->value;
+				current = current->next;
+			}
+		}
+	}
 	delete[] map;
 }
 

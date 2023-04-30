@@ -31,6 +31,25 @@ public:
 			size++;
 		}
 	}
+
+	void Add(City*& set_city, City*& source, int& distance) {
+		if (size < capacity) {
+			data[size] = { set_city, source, distance };
+			size++;
+		}
+		else {
+			T* tmp = data;
+			capacity *= 2;
+			data = new T[capacity];
+			for (int i = 0; i < size; i++) {
+				data[i] = tmp[i];
+			}
+			delete[] tmp;
+			data[size] = { set_city, source, distance };
+			size++;
+		}
+	}
+
 	T& operator[](int i) {
 		if (size > i) {
 			return data[i];
